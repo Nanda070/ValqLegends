@@ -37,6 +37,7 @@ public final class LegendsPlugin extends JavaPlugin implements Listener, TabExec
     private static LegendsPlugin instance;
     private NamespacedKey key;
     private Abilities abilities;
+    private Recipes recipes;
     private final Map<String, Long> cooldown = new HashMap<>();
 
     @Override public void onEnable() {
@@ -44,6 +45,8 @@ public final class LegendsPlugin extends JavaPlugin implements Listener, TabExec
         saveDefaultConfig();
         key = new NamespacedKey(this, "legend");
         abilities = new Abilities(this);
+        recipes = new Recipes(this);
+        getServer().getPluginManager().registerEvents(recipes, this);
         getServer().getPluginManager().registerEvents(this, this);
         getCommand("legend").setExecutor(this);
         getCommand("legend").setTabCompleter(this);
@@ -162,7 +165,7 @@ public final class LegendsPlugin extends JavaPlugin implements Listener, TabExec
                 s.sendMessage(Component.text("Выдано: " + a[1] + " → " + t.getName(), NamedTextColor.GREEN));
             }
             case "gui" -> { if (s instanceof Player p) gui(p); }
-            case "reload" -> { reloadConfig(); s.sendMessage(Component.text("Перезагружено", NamedTextColor.GREEN)); }
+            case "reload" -> { reloadConfig(); recipes.register(); s.sendMessage(Component.text("Перезагружено", NamedTextColor.GREEN)); }
             default -> {
                 s.sendMessage(Component.text("Легендарное оружие:", NamedTextColor.GOLD));
                 for (Weapons.Def d : Weapons.ALL.values()) s.sendMessage(Component.text(" " + d.id() + " — " + d.name(), TextColor.fromHexString(d.color())));

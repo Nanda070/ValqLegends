@@ -1,1 +1,4 @@
-# nothing to configure yet
+recipes:
+  mode: hard      # hard (very expensive, vanilla survival), easy (battle royale) or off
+loot:
+  chance: 0.04    # chance per rich chest (ancient city, bastion treasure, end city, ominous vault, stronghold library)
