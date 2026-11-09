@@ -36,7 +36,7 @@ Permission: `legends.admin` (default: op).
 ## Build
 
 ```bash
-PAPER_API=path/to/paper-api-1.21.11-R0.1-SNAPSHOT.jar PAPER_LIBS=path/to/libraries bash build.sh
+JAVA_HOME=/path/to/jdk21 PAPER_API=path/to/paper-api-1.21.11-R0.1-SNAPSHOT.jar PAPER_LIBS=path/to/libraries bash build.sh
 ```
 
 The weapons use `custom_model_data` 1 to 13, so a resource pack can give each its own model.
