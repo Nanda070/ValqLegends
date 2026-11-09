@@ -82,6 +82,7 @@ public final class LegendsPlugin extends JavaPlugin implements Listener, TabExec
         im.lore(lore);
         im.setUnbreakable(true);
         im.setCustomModelData(d.model());
+        im.setItemModel(new NamespacedKey("valqlegends", d.id()));
         im.addItemFlags(ItemFlag.HIDE_UNBREAKABLE, ItemFlag.HIDE_ATTRIBUTES);
         NamespacedKey ak = new NamespacedKey(this, "dmg_" + d.id());
         im.addAttributeModifier(Attribute.ATTACK_DAMAGE, new AttributeModifier(ak, d.damage() - 1, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.MAINHAND));
@@ -109,6 +110,7 @@ public final class LegendsPlugin extends JavaPlugin implements Listener, TabExec
         Player p = e.getPlayer();
         Weapons.Def d = defOf(p.getInventory().getItemInMainHand());
         if (d == null) return;
+        if (d.cdPrimary() == 0 && !p.isSneaking()) return;                   // bows and crossbows: a plain right click is the vanilla draw
         e.setCancelled(true);
         boolean sec = p.isSneaking();
         String k = p.getUniqueId() + d.id() + (sec ? "2" : "1");
@@ -121,6 +123,34 @@ public final class LegendsPlugin extends JavaPlugin implements Listener, TabExec
         cooldown.put(k, now + (sec ? d.cdSecondary() : d.cdPrimary()) * 1000L);
         abilities.use(p, d, sec);
         p.sendActionBar(Component.text((sec ? d.secondary() : d.primary()).split(":")[0], TextColor.fromHexString(d.color())));
+    }
+
+    /** The resource pack with the 3D models: sent on join (resource-pack.url and sha1 in config.yml; it comes next to other packs, not instead). */
+    @EventHandler
+    public void onJoin(org.bukkit.event.player.PlayerJoinEvent e) {
+        String url = getConfig().getString("resource-pack.url", ""), sha = getConfig().getString("resource-pack.sha1", "");
+        if (url.isBlank() || sha.length() != 40) return;
+        Bukkit.getScheduler().runTaskLater(this, () -> {
+            if (!e.getPlayer().isOnline()) return;
+            e.getPlayer().addResourcePack(UUID.nameUUIDFromBytes("valqlegends-pack".getBytes(java.nio.charset.StandardCharsets.UTF_8)), url, HexFormat.of().parseHex(sha),
+                    "Модели легендарного оружия", getConfig().getBoolean("resource-pack.required", false));
+        }, 60L);
+    }
+
+    @EventHandler
+    public void onShoot(org.bukkit.event.entity.EntityShootBowEvent e) {
+        if (!(e.getEntity() instanceof Player p) || e.getProjectile() == null) return;
+        Weapons.Def d = defOf(e.getBow());
+        if (d == null) return;
+        if (d.id().equals("solar_bow")) e.getProjectile().setFireTicks(200);
+        if (d.id().equals("abyss_crossbow") && e.getProjectile() instanceof org.bukkit.entity.AbstractArrow a) a.setPierceLevel(Math.max(a.getPierceLevel(), 2));
+    }
+
+    @EventHandler
+    public void onArrowHit(org.bukkit.event.entity.ProjectileHitEvent e) {
+        if (!(e.getEntity().getShooter() instanceof Player p) || !(e.getHitEntity() instanceof LivingEntity t)) return;
+        Weapons.Def d = defOf(p.getInventory().getItemInMainHand());
+        if (d != null && d.id().equals("solar_bow")) t.addPotionEffect(new org.bukkit.potion.PotionEffect(org.bukkit.potion.PotionEffectType.GLOWING, 100, 0));
     }
 
     @EventHandler
@@ -137,7 +167,7 @@ public final class LegendsPlugin extends JavaPlugin implements Listener, TabExec
 
     private void gui(Player p) {
         Menu m = new Menu();
-        m.inv = Bukkit.createInventory(m, 18, Component.text("Легендарное оружие"));
+        m.inv = Bukkit.createInventory(m, 27, Component.text("Легендарное оружие"));
         int i = 0;
         for (String id : Weapons.ALL.keySet()) m.inv.setItem(i++, create(id));
         p.openInventory(m.inv);

@@ -35,6 +35,13 @@ final class Recipes implements Listener {
         HARD.put("gale_blade", new Ring(Material.DIAMOND_BLOCK, Material.NETHER_STAR, Material.BREEZE_ROD));
         HARD.put("earth_hammer", new Ring(Material.NETHERITE_INGOT, Material.NETHER_STAR, Material.ANCIENT_DEBRIS));
         HARD.put("life_staff", new Ring(Material.DIAMOND_BLOCK, Material.NETHER_STAR, Material.TOTEM_OF_UNDYING));
+        HARD.put("solar_bow", new Ring(Material.GOLD_BLOCK, Material.NETHER_STAR, Material.BLAZE_ROD));
+        HARD.put("abyss_crossbow", new Ring(Material.NETHERITE_INGOT, Material.NETHER_STAR, Material.ENDER_EYE));
+        HARD.put("lunar_katana", new Ring(Material.DIAMOND_BLOCK, Material.NETHER_STAR, Material.AMETHYST_SHARD));
+        HARD.put("blaze_cleaver", new Ring(Material.GOLD_BLOCK, Material.NETHER_STAR, Material.MAGMA_CREAM));
+        HARD.put("venom_fang", new Ring(Material.DIAMOND_BLOCK, Material.NETHER_STAR, Material.SPIDER_EYE));
+        HARD.put("star_wand", new Ring(Material.DIAMOND_BLOCK, Material.NETHER_STAR, Material.END_CRYSTAL));
+        HARD.put("reaper_scythe", new Ring(Material.NETHERITE_INGOT, Material.NETHER_STAR, Material.WITHER_SKELETON_SKULL));
     }
     private static final Ring EASY = new Ring(Material.GOLD_INGOT, Material.DIAMOND, Material.IRON_INGOT);
 

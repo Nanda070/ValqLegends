@@ -1,6 +1,6 @@
 # ValqLegends
 
-Thirteen legendary weapons for Paper 1.21.11 (Java 21). Every weapon has a passive effect, a **primary** ability (right click)
+Twenty legendary weapons for Paper 1.21.11 (Java 21). Every weapon has a passive effect, a **primary** ability (right click)
 and a **secondary** ability (sneak + right click), each with its own cooldown. Nothing breaks or burns blocks in the world.
 
 Works on its own. Other plugins can use the small API: `LegendsPlugin.create(id)`, `LegendsPlugin.ids()`, `LegendsPlugin.idOf(item)`.
@@ -23,6 +23,13 @@ Made for the VALQAUYM server (battle royale loot) and used together with its Val
 | `gale_blade` | Клинок бури | diamond_sword | — | Прыжок ветра: мощный прыжок вперёд и вверх (6 s) | Вихрь: вращающийся удар по всем рядом (18 s) |
 | `earth_hammer` | Молот земли | iron_axe | — | Удар о землю: подбрасывает и ранит врагов вокруг (11 s) | Землетрясение: замедляет всех в 10 блоках (35 s) |
 | `life_staff` | Жезл жизни | stick | Дыхание жизни: медленная регенерация, пока жезл в руке | Исцеление: возвращает вам 8 сердец (12 s) | Благословение: лечит союзников в 8 блоках на 6 сердец (25 s) |
+| `solar_bow` | Лук рассвета | bow | Свет зари: стрелы подсвечивают цель и поджигают её | Обычный выстрел (0 s) | Солнечный залп: пять огненных стрел веером (30 s) |
+| `abyss_crossbow` | Арбалет бездны | crossbow | Бездна: болты пробивают цели насквозь | Обычный выстрел (0 s) | Бездонный залп: три быстрых болта (28 s) |
+| `lunar_katana` | Лунная катана | netherite_sword | — | Лунный росчерк: полукруглая волна клинка перед вами (7 s) | Лунный шаг: невидимость и скорость на 4 секунды (22 s) |
+| `blaze_cleaver` | Тесак пламени | golden_axe | Жар: удар поджигает цель | Огненный волчок: огонь по кругу вокруг вас (9 s) | Прыжок-удар: прыжок вперёд и огненный взрыв при приземлении (26 s) |
+| `venom_fang` | Ядовитый клык | iron_sword | Яд: удар отравляет цель | Облако яда: ядовитое облако перед вами (9 s) | Противоядие: снимает дурные эффекты и лечит 4 сердца (30 s) |
+| `star_wand` | Звёздный жезл | end_rod | — | Звездопад: падающие звёзды в точке взгляда (8 s) | Звёздный рывок: полёт вверх с медленным падением (24 s) |
+| `reaper_scythe` | Коса жнеца | diamond_hoe | Жатва: убийство возвращает 4 сердца | Сбор душ: урон всем рядом, чем больше целей, тем сильнее (9 s) | Казнь: мгновенно добивает цель с малым здоровьем (30 s) |
 
 ## Commands
 
@@ -39,7 +46,15 @@ Permission: `legends.admin` (default: op).
 JAVA_HOME=/path/to/jdk21 PAPER_API=path/to/paper-api-1.21.11-R0.1-SNAPSHOT.jar PAPER_LIBS=path/to/libraries bash build.sh
 ```
 
-The weapons use `custom_model_data` 1 to 13, so a resource pack can give each its own model.
+Every weapon sets the `item_model` component to `valqlegends:<id>`, so a resource pack gives it its own model:
+`assets/valqlegends/items/<id>.json`. `pack/bundle.py` builds such a pack from ready-made 3D weapon packs (not included
+here, they have their own licenses); `pack/gen_models.py` builds simple cuboid models of our own. Set the pack's address
+in `config.yml` (`resource-pack.url` and `sha1`): it is sent to players when they join.
+
+## Recipes and loot
+
+`recipes.mode` is `hard` (nether stars, netherite, rare drops), `easy` (iron, gold, diamonds) or `off`. With `loot.chance`
+the weapons also drop from ancient cities, bastion treasure, end cities and ominous vaults.
 
 ## License
 

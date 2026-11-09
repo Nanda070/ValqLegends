@@ -81,6 +81,18 @@ final class Abilities {
             case "earth_hammer:2" -> { for (LivingEntity t : near(p, 10)) t.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 120, 2)); burst(p.getLocation(), Particle.BLOCK, 80, 3, Material.DIRT); p.playSound(p, Sound.ENTITY_GENERIC_EXPLODE, 0.6f, 0.5f); }
             case "life_staff:1" -> { heal(p, 8); burst(p.getLocation().add(0, 1, 0), Particle.HEART, 12, 0.6); p.playSound(p, Sound.ENTITY_PLAYER_LEVELUP, 1f, 1.4f); }
             case "life_staff:2" -> { for (Entity e : p.getNearbyEntities(8, 8, 8)) if (e instanceof Player o) { heal(o, 6); burst(o.getLocation().add(0, 1, 0), Particle.HEART, 8, 0.5); } p.playSound(p, Sound.BLOCK_BEACON_POWER_SELECT, 1f, 1.5f); }
+            case "lunar_katana:1" -> slash(p, 6, 9);
+            case "lunar_katana:2" -> { p.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, 80, 0)); p.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 80, 2)); burst(p.getLocation().add(0, 1, 0), Particle.END_ROD, 30, 0.6); p.playSound(p, Sound.ENTITY_ENDERMAN_TELEPORT, 0.6f, 1.8f); }
+            case "blaze_cleaver:1" -> { for (LivingEntity t : near(p, 4)) { hurt(t, p, 7); t.setFireTicks(80); } burst(p.getLocation().add(0, 1, 0), Particle.FLAME, 90, 2.2); p.playSound(p, Sound.ITEM_FIRECHARGE_USE, 1f, 0.6f); }
+            case "blaze_cleaver:2" -> { p.setVelocity(p.getEyeLocation().getDirection().multiply(1.3).setY(0.8)); Bukkit.getScheduler().runTaskLater(plugin, () -> { for (LivingEntity t : near(p, 5)) { hurt(t, p, 9); t.setFireTicks(100); } burst(p.getLocation(), Particle.EXPLOSION, 6, 1.5); p.setFallDistance(0); }, 12L); }
+            case "venom_fang:1" -> poisonCloud(p);
+            case "venom_fang:2" -> { for (var ef : new ArrayList<>(p.getActivePotionEffects())) if (ef.getType().equals(PotionEffectType.POISON) || ef.getType().equals(PotionEffectType.WITHER) || ef.getType().equals(PotionEffectType.SLOWNESS) || ef.getType().equals(PotionEffectType.WEAKNESS)) p.removePotionEffect(ef.getType()); heal(p, 4); burst(p.getLocation().add(0, 1, 0), Particle.HAPPY_VILLAGER, 25, 0.6); }
+            case "star_wand:1" -> starfall(p);
+            case "star_wand:2" -> { p.setVelocity(new Vector(0, 1.3, 0)); p.addPotionEffect(new PotionEffect(PotionEffectType.SLOW_FALLING, 120, 0)); burst(p.getLocation(), Particle.END_ROD, 40, 0.6); p.playSound(p, Sound.ENTITY_FIREWORK_ROCKET_LAUNCH, 1f, 1.2f); }
+            case "reaper_scythe:1" -> { List<LivingEntity> ts = near(p, 6); double dmg = 5 + ts.size() * 2.5; for (LivingEntity t : ts) hurt(t, p, Math.min(dmg, 20)); burst(p.getLocation().add(0, 1, 0), Particle.SOUL, 60, 2.5); p.playSound(p, Sound.PARTICLE_SOUL_ESCAPE, 1f, 0.8f); }
+            case "reaper_scythe:2" -> { LivingEntity t = target(p, 6); if (t != null) { double max = t.getAttribute(Attribute.MAX_HEALTH).getValue(); if (t.getHealth() <= max * 0.3) { hurt(t, p, t.getHealth() + 1000); burst(t.getLocation().add(0, 1, 0), Particle.SOUL, 30, 0.6); heal(p, 2); } else hurt(t, p, 6); } }
+            case "solar_bow:2" -> fan(p, 5, true, 3.0);
+            case "abyss_crossbow:2" -> fan(p, 3, false, 3.2);
             default -> { }
         }
     }
@@ -89,6 +101,9 @@ final class Abilities {
     void onHit(Player p, Weapons.Def d, LivingEntity t, double dealt) {
         switch (d.id()) {
             case "crimson_fang" -> { heal(p, dealt * 0.15 / 2); burst(p.getLocation().add(0, 1, 0), Particle.HEART, 3, 0.3); }
+            case "blaze_cleaver" -> t.setFireTicks(80);
+            case "venom_fang" -> t.addPotionEffect(new PotionEffect(PotionEffectType.POISON, 80, 1));
+            case "reaper_scythe" -> { if (t.getHealth() - dealt <= 0.5) heal(p, 4); }
             case "frost_brand" -> { t.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 60, 1)); burst(t.getLocation().add(0, 1, 0), Particle.SNOWFLAKE, 10, 0.3); }
             default -> { }
         }
@@ -247,5 +262,54 @@ final class Abilities {
             a.setVelocity(d.clone().add(side).multiply(2.4));
         }
         p.playSound(p, Sound.ENTITY_ARROW_SHOOT, 1f, 1.4f);
+    }
+
+    private void slash(Player p, double range, double dmg) {
+        Vector d = p.getEyeLocation().getDirection().setY(0).normalize();
+        Vector side = d.clone().crossProduct(new Vector(0, 1, 0)).normalize();
+        for (double a = -1.1; a <= 1.1; a += 0.12) {
+            Vector v = d.clone().multiply(Math.cos(a) * range).add(side.clone().multiply(Math.sin(a) * range));
+            p.getWorld().spawnParticle(Particle.SWEEP_ATTACK, p.getLocation().add(0, 1.1, 0).add(v), 1, 0, 0, 0, 0);
+        }
+        for (LivingEntity t : near(p, range)) {
+            Vector to = t.getLocation().toVector().subtract(p.getLocation().toVector()).setY(0);
+            if (to.lengthSquared() > 0.01 && to.angle(d) < 1.2) { hurt(t, p, dmg); t.setVelocity(to.normalize().multiply(0.6).setY(0.25)); }
+        }
+        p.playSound(p, Sound.ENTITY_PLAYER_ATTACK_SWEEP, 1f, 1.5f);
+    }
+
+    private void poisonCloud(Player p) {
+        Location l = p.getEyeLocation().add(p.getEyeLocation().getDirection().multiply(3)).subtract(0, 1, 0);
+        p.getWorld().spawn(l, AreaEffectCloud.class, a -> {
+            a.setSource(p); a.setRadius(3.2f); a.setDuration(100); a.setColor(Color.fromRGB(0x5BB520));
+            a.addCustomEffect(new PotionEffect(PotionEffectType.POISON, 100, 1), true);
+        });
+        p.playSound(p, Sound.ENTITY_SPLASH_POTION_THROW, 1f, 0.7f);
+    }
+
+    private void starfall(Player p) {
+        Location c = aim(p, 35);
+        Random r = new Random();
+        for (int i = 0; i < 6; i++) {
+            Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                Location l = c.clone().add(r.nextDouble() * 6 - 3, 0, r.nextDouble() * 6 - 3);
+                for (double h = 12; h > 0; h -= 1.5) l.getWorld().spawnParticle(Particle.END_ROD, l.clone().add(0, h, 0), 1, 0, 0, 0, 0);
+                burst(l, Particle.FIREWORK, 25, 0.5);
+                l.getWorld().playSound(l, Sound.ENTITY_FIREWORK_ROCKET_BLAST, 0.7f, 1.5f);
+                for (Entity e : l.getWorld().getNearbyEntities(l, 2.2, 2.5, 2.2)) if (e instanceof LivingEntity le && e != p && !(e instanceof ArmorStand)) hurt(le, p, 5);
+            }, 4L * i);
+        }
+    }
+
+    /** A fan of arrows (bows and crossbows): count arrows spread sideways, optionally burning. */
+    private void fan(Player p, int count, boolean fire, double speed) {
+        Vector d = p.getEyeLocation().getDirection();
+        for (int k = 0; k < count; k++) {
+            double ang = (k - (count - 1) / 2.0) * 0.12;
+            Vector v = d.clone().rotateAroundY(ang).multiply(speed);
+            Arrow a = p.getWorld().spawn(p.getEyeLocation().add(d), Arrow.class, ar -> { ar.setShooter(p); ar.setDamage(6); ar.setPickupStatus(AbstractArrow.PickupStatus.DISALLOWED); ar.setFireTicks(fire ? 200 : 0); ar.setPierceLevel(fire ? 0 : 2); });
+            a.setVelocity(v);
+        }
+        p.playSound(p, Sound.ENTITY_ARROW_SHOOT, 1f, 0.8f);
     }
 }
