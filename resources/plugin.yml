@@ -1,0 +1,14 @@
+name: ValqLegends
+version: 1.0.0
+main: kz.valqauym.legends.LegendsPlugin
+api-version: "1.21"
+description: Thirteen legendary weapons with passive, primary and secondary abilities
+author: Nanda070
+commands:
+  legend:
+    description: Legendary weapons - give, list, gui
+    usage: /legend give <id> [player] | list | gui | reload
+    aliases: [legends, легенды]
+permissions:
+  legends.admin:
+    default: op
